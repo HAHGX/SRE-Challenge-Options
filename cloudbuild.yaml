@@ -1,0 +1,38 @@
+steps:
+  # Paso 1: Construir la imagen de Docker
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["build", "-t", "gcr.io/$PROJECT_ID/sre-challenge-app", "."]
+    id: "build-docker-image"
+    timeout: "1600s"
+    
+  # Paso 2: Subir la imagen de Docker a Container Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/sre-challenge-app"]
+    id: "push-docker-image"
+    timeout: "600s"
+    
+  # Paso 3: Desplegar la aplicación en Cloud Functions
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      - "functions"
+      - "deploy"
+      - "sre-challenge-app"
+      - "--region=us-central1"
+      - "--entry-point=predict"
+      - "--runtime=python38"
+      - "--trigger-http"
+      - "--allow-unauthenticated"
+      - "--source=https://storage.googleapis.com/$PROJECT_ID/sre-challenge-app/sre-challenge-app.zip"
+    id: "deploy-cloud-functions"
+    timeout: "180s"
+    
+  # Paso 4: Eliminar la imagen de Docker de Container Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["image", "rm", "gcr.io/$PROJECT_ID/sre-challenge-app"]
+    id: "delete-docker-image"
+    timeout: "30s"
+    
+substitutions:
+  _BUCKET_NAME: "sre-challenge-bucket"
+  _FUNCTION_NAME: "sre-challenge-app"
+  _REGION: "us-central1"
