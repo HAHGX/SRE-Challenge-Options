@@ -1,4 +1,4 @@
-# Proyecto SRE Challenge -  implementación de API REST para modelo de predicción de retrasos en vuelos
+# Proyecto SRE Challenge -  Implementación de API REST para modelo de predicción de retrasos en vuelos
 
 En este desafío, se nos proporcionó un Jupyter Notebook que contiene el trabajo de un Data Scientist y un ML Engineer. El objetivo del DS era predecir la probabilidad de atraso de los vuelos que aterrizan o despegan del aeropuerto de Santiago de Chile (SCL). Ahora, como SRE Engineer, nuestro desafío consiste en tomar el trabajo del equipo y exponerlo para que sea explotado por un sistema.
 
