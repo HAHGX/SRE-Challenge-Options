@@ -1,0 +1,23 @@
+name: Stress Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  stress-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install wrk
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential libssl-dev git -y
+          git clone https://github.com/wg/wrk.git wrk
+          cd wrk
+          make
+          sudo cp wrk /usr/local/bin
+      - name: Start load test
+        run: wrk -t2 -c200 -d45s -s tests/load-test.lua http://${{ secrets.API_URL }}
+#Nota: Los secretos deben ser definidos en la configuración del repositorio.
+
+
+

@@ -1,0 +1,55 @@
+name: Deploy
+
+on: 
+  push:
+    branches:
+      - master
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: ${{ secrets.GCP_REGION }}
+  FUNCTION_NAME: ${{ secrets.FUNCTION_NAME }}
+  STORAGE_BUCKET: ${{ secrets.STORAGE_BUCKET }}
+
+jobs:
+  deploy:
+    name: Deploy to Cloud Functions
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v0.2.0
+      with:
+        project_id: ${{ env.PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v1.4.0
+
+    - name: Terraform Init
+      run: |
+        cd scripts/
+        ./install_terraform.sh
+        terraform init
+
+    - name: Terraform Apply
+      run: |
+        cd scripts/
+        terraform apply -auto-approve
+
+    - name: Deploy Cloud Function
+      run: |
+        gcloud functions deploy $FUNCTION_NAME --region=$REGION --runtime python38 --trigger-http --entry-point=predict --memory=2GB --source=https://storage.googleapis.com/$STORAGE_BUCKET/api.zip
+        gcloud functions add-iam-policy-binding $FUNCTION_NAME --member=allUsers --role=roles/cloudfunctions.invoker
+
+    - name: Trigger Cloud Build
+      run: |
+        gcloud builds submit --substitutions=_REGION=$REGION,_BUCKET=$STORAGE_BUCKET
+
+    - name: Output Function URL
+      run: |
+        echo "https://$REGION-$PROJECT_ID.cloudfunctions.net/$FUNCTION_NAME"
