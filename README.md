@@ -46,7 +46,7 @@ El proyecto está organizado en las siguientes carpetas y archivos:
 - api/models: Contiene el modelo serializado.
 - api/requirements.txt: Archivo que contiene las dependencias de Python necesarias para la API REST.
 - terraform: Contiene el archivo de configuración de Terraform.
-- terraform/main.tf: Archivo de configuración principal de Terraform.
+- terraform/terraform.tf: Archivo de configuración principal de Terraform.
 - terraform/variables.tf: Archivo de definición de variables de Terraform.
 - terraform/provider.tf: Archivo que define el proveedor de la nube.
 - cloudbuild.yaml: Archivo de configuración de Cloud Build.
@@ -136,9 +136,63 @@ Primero, necesitamos configurar Terraform para que pueda crear los recursos nece
           description = "Nombre de la función de Cloud Functions que se desplegará"
         }
         ```
-2. A continuación, crearemos un archivo llamado main.tf con la configuración de los recursos de GCP que necesitamos para desplegar la aplicación. En este caso, necesitamos crear una función de Cloud Functions, un bucket de Cloud Storage para almacenar el modelo serializado y un servicio de Cloud Pub/Sub para recibir las notificaciones de Cloud Build.
+2. A continuación, crearemos un archivo llamado terraform.tf con la configuración de los recursos de GCP que necesitamos para desplegar la aplicación. En este caso, necesitamos crear una función de Cloud Functions, un bucket de Cloud Storage para almacenar el modelo serializado y un servicio de Cloud Pub/Sub para recibir las notificaciones de Cloud Build.
 
 ``` json
+provider "google" {
+  project = var.project_id
+  region  = var.region
+}
+
+resource "google_storage_bucket" "model_bucket" {
+  name = var.model_bucket_name
+}
+
+resource "google_cloudfunctions_function" "predict_function" {
+  name        = var.function_name
+  description = "API for predicting flight delays"
+  runtime     = "python37"
+  trigger_http = true
+
+  source_archive_bucket = google_storage_bucket.model_bucket.name
+  source_archive_object = "app.zip"
+  entry_point           = "predict"
+
+  environment_variables = {
+    "MODEL_BUCKET_NAME" = var.model_bucket_name
+    "MODEL_FILE_NAME"   = var.model_file_name
+  }
+}
+
+resource "google_pubsub_topic" "cloud_build_topic" {
+  name = "cloud-builds"
+}
+
+resource "google_pubsub_subscription" "cloud_build_subscription" {
+  name = "cloud-build-subscription"
+  topic = google_pubsub_topic.cloud_build_topic.name
+}
+
+resource "google_cloud_build_trigger" "build_trigger" {
+  name = "build-trigger"
+  description = "Trigger a Cloud Build when new code is pushed to GitHub"
+  github {
+    owner = var.github_owner
+    name = var.github_repo
+    push {
+      branch = var.github_branch
+    }
+  }
+  substitutions = {
+    "_REGION"           = var.region
+    "_PROJECT_ID"       = var.project_id
+    "_FUNCTION_NAME"    = var.function_name
+    "_MODEL_BUCKET_NAME" = var.model_bucket_name
+    "_MODEL_FILE_NAME"  = var.model_file_name
+  }
+  filename = "cloudbuild.yaml"
+}
+
 
 ```
 Finalmente, debemos configurar Cloud Build para que se despliegue nuestra aplicación cuando haya cambios en el repositorio. Para ello, creamos el archivo cloudbuild.yaml en la raíz del repositorio y añadimos el siguiente código:
