@@ -67,10 +67,69 @@ El proyecto está organizado en las siguientes carpetas y archivos:
 
 Antes de ejecutar este proyecto, es necesario contar con los siguientes requisitos:
 
-- Tener instalado Python 3.
+- Verificar que tienes instalado Python 3.
+Para verificar si tienes Python 3 instalado en Mac y Ubuntu, puedes seguir los siguientes pasos:
+
+  En Mac:
+
+  Abre la terminal (encontrarás la terminal en Aplicaciones > Utilidades > Terminal).
+  Escribe el siguiente comando en la terminal y presiona Enter:
+  ````bash
+
+  python3 --version
+
+  ````
+  Si Python 3 está instalado, verás la versión de Python 3 que está instalada. Si no, verás un mensaje de error indicando que el comando no se encontró.
+  Si Python 3 no está instalado, puedes descargar la última versión de Python 3 desde la página web oficial de Python (https://www.python.org/downloads/mac-osx/) y seguir las instrucciones de instalación.
+  En Ubuntu:
+  1. Abre la terminal (puedes usar el atajo de teclado Ctrl+Alt+T).
+  2. Escribe el siguiente comando en la terminal y presiona Enter:
+  ````bash
+
+  python3 --version
+
+  ````
+  Si Python 3 está instalado, verás la versión de Python 3 que está instalada. Si no, verás un mensaje de error indicando que el comando no se encontró.
+  Si Python 3 no está instalado, puedes instalarlo usando el siguiente comando en la terminal:
+
+  ````bash
+
+  sudo apt-get update
+  sudo apt-get install python3
+
+  ````
+  Esto actualizará el sistema y luego instalará la última versión de Python 3.
+
+
+
 - Tener una cuenta en GCP con los permisos necesarios para crear recursos en el proyecto.
 - Tener instalado Terraform en la máquina local.
+  Para verificar si tienes Terraform instalado en Ubuntu o Mac, puedes seguir los siguientes pasos:
 
+  En Ubuntu:
+
+  a. Abre la terminal (puedes usar el atajo de teclado Ctrl+Alt+T).
+  b. Escribe el siguiente comando en la terminal y presiona Enter:
+  ````bash
+
+  terraform version
+
+  ````
+  c. Si Terraform está instalado, verás la versión de Terraform que está instalada. Si no, verás un mensaje de error indicando que el comando no se encontró.
+  d. Si Terraform no está instalado, puedes instalarlo siguiendo las instrucciones en la documentación oficial de Terraform: https://learn.hashicorp.com/tutorials/terraform/install-cli
+  
+  En Mac:
+
+  a. Abre la terminal (encontrarás la terminal en Aplicaciones > Utilidades > Terminal).
+  b. Escribe el siguiente comando en la terminal y presiona Enter:
+  ````
+
+  terraform version
+
+  ````
+
+Si Terraform está instalado, verás la versión de Terraform que está instalada. Si no, verás un mensaje de error indicando que el comando no se encontró.
+Si Terraform no está instalado, puedes instalarlo siguiendo las instrucciones en la documentación oficial de Terraform: https://learn.hashicorp.com/tutorials/terraform/install-cli#install-terraform-on-macos-using-homebrew
 ## Paso 1: Preparar el ambiente de desarrollo
 1. Clonar el repositorio: git clone https://github.com/xuanox/SRE-Challenge-Options.git
 2. Instalar las dependencias: pip install -r api/requirements.txt
@@ -82,7 +141,37 @@ Antes de ejecutar este proyecto, es necesario contar con los siguientes requisit
 
 # Paso 3: Crear y desplegar la aplicación en GCP
 1. Crear un proyecto en GCP.
+    Para crear un proyecto en Google Cloud Platform (GCP), sigue los siguientes pasos:
+
+    a. Accede a la consola de GCP en https://console.cloud.google.com/
+
+    b. Haz clic en el botón de "Seleccionar proyecto" ubicado en la parte superior de la pantalla, justo al lado del logo de GCP.
+
+    c. Haz clic en el botón "Crear proyecto" ubicado en la parte superior derecha de la pantalla.
+    Ingresa un nombre para el proyecto en el campo "Nombre del proyecto".
+
+    d. (Opcional) Puedes editar el ID del proyecto. Si no lo haces, se generará automáticamente un ID basado en el nombre del proyecto.
+
+    e. Selecciona la organización que usará el proyecto. Si no tienes una organización, puedes dejar la opción por defecto.
+
+    f. Haz clic en "Crear" para crear el proyecto.
+
+    Una vez que hayas creado el proyecto, podrás acceder a él desde la consola de GCP. Desde allí, puedes configurar las diferentes opciones y servicios que ofrece GCP para tu proyecto, como Google Compute Engine, Google Kubernetes Engine, Google Cloud Storage, entre otros.
+
 2. Habilitar las siguientes APIs: Cloud Functions, Cloud Pub/Sub y Container Registry.
+Para habilitar las siguientes APIs: Cloud Functions, Cloud Pub/Sub y Container Registry en Google Cloud Platform (GCP), sigue los siguientes pasos:
+
+Accede a la consola de GCP en https://console.cloud.google.com/.
+Selecciona el proyecto en el que deseas habilitar las APIs.
+- Haz clic en el botón de navegación en el lado izquierdo de la pantalla y selecciona la opción "API y servicios" y luego "Biblioteca".
+-  Busca las siguientes APIs: Cloud Functions, Cloud Pub/Sub y Container Registry.
+- Haz clic en cada API y luego haz clic en el botón "Habilitar" para habilitarla.
+- Espera a que se habiliten las APIs. Esto puede tomar unos minutos.
+
+Una vez que hayas habilitado las APIs, podrás utilizar los servicios correspondientes en tu proyecto de GCP.
+````
+````
+
 3. Crear un depósito de Cloud Storage en el proyecto.
 4. Crear una cuenta de servicio con el rol Editor y descargar la clave JSON.
 5. Configurar el archivo scripts/variables.tf con las 6. variables necesarias: nombre del proyecto, nombre de la cuenta de servicio y ruta del archivo de clave JSON.
@@ -97,7 +186,7 @@ Para automatizar el proceso de construcción y despliegue de la aplicación, vam
 Primero, necesitamos configurar Terraform para que pueda crear los recursos necesarios en GCP.
 
 1. En la raíz del proyecto, crearemos un archivo llamado variables.tf con las variables necesarias para configurar la aplicación. Estas variables incluyen el nombre del proyecto de GCP, la región y zona de GCP en la que se desplegarán los recursos, el nombre de la función de Cloud Functions y la ruta al archivo del modelo serializado. 
-        ```json
+        ```bash
         #variables.tf 
 
         variable "project_id" {
@@ -138,7 +227,7 @@ Primero, necesitamos configurar Terraform para que pueda crear los recursos nece
         ```
 2. A continuación, crearemos un archivo llamado terraform.tf con la configuración de los recursos de GCP que necesitamos para desplegar la aplicación. En este caso, necesitamos crear una función de Cloud Functions, un bucket de Cloud Storage para almacenar el modelo serializado y un servicio de Cloud Pub/Sub para recibir las notificaciones de Cloud Build.
 
-``` json
+``` bash
 provider "google" {
   project = var.project_id
   region  = var.region
@@ -236,8 +325,10 @@ Este archivo define un flujo de trabajo para Cloud Build que incluye los siguien
 Una vez que se han configurado todos los recursos de GCP y se han definido los archivos de configuración, podemos ejecutar los siguientes comandos para desplegar la aplicación:
 
 ````bash
+
 terraform init
 terraform apply
+
 ````
 Estos comandos crearán los recursos de GCP necesarios y desplegarán la aplicación en Cloud Functions. Una vez que se haya completado el despliegue, Cloud Build notificará la finalización a través de Cloud Pub/Sub y el modelo serializado se almacenará en el bucket de Cloud Storage que hemos creado.
 
