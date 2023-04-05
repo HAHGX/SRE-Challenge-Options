@@ -1,6 +1,6 @@
 # Proyecto SRE Challenge -  Implementación de API REST para modelo de predicción de retrasos en vuelos
 
-En este desafío, se nos proporcionó un Jupyter Notebook que contiene el trabajo de un Data Scientist y un ML Engineer. El objetivo del DS era predecir la probabilidad de atraso de los vuelos que aterrizan o despegan del aeropuerto de Santiago de Chile (SCL). Ahora, como SRE Engineer, nuestro desafío consiste en tomar el trabajo del equipo y exponerlo para que sea explotado por un sistema.
+Se proporcionó un Jupyter Notebook que contiene el trabajo de un Data Scientist y un ML Engineer. El objetivo del DS era predecir la probabilidad de atraso de los vuelos que aterrizan o despegan del aeropuerto de Santiago de Chile (SCL). Ahora, como SRE Engineer, nuestro desafío consiste en tomar el trabajo del equipo y exponerlo para que sea explotado por un sistema.
 
 ## Solución propuesta
 Para resolver el problema propuesto, se ha decidido utilizar Flask para crear una API REST que permita exponer el modelo serializado. También se utilizará Google Cloud Platform (GCP) para automatizar el proceso de construcción y despliegue de la API, utilizando uno o varios servicios cloud, incluyendo Storage para guardar el depósito de Cloud Storage donde se almacenará tanto el código de Cloud Function (paquete zip) como el archivo del modelo. Además, se habilitarán las API de Google Cloud necesarias para que el proyecto funcione correctamente.
